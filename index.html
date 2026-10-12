@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -467,6 +466,10 @@
                 try {
                     const formData = new FormData();
                     formData.append('key', CONFIG.imgbbApiKey);
+                    
+                    // เพิ่มเวลาลบรูปอัตโนมัติ (ตัวอย่าง: 604800 วินาที = 7 วัน)
+                    // เปลี่ยนตัวเลขนี้ได้ (60 วินาที ถึง 15552000 วินาที)
+                    formData.append('expiration', '604800'); 
                     
                     // แปลง Canvas เป็น Blob แทน Base64 เพื่อลดขนาดไฟล์ ทำให้ส่งข้อมูลไวขึ้นมาก (บีบอัดภาพที่ 60%)
                     const imageBlob = await new Promise(resolve => D.canvas.toBlob(resolve, 'image/jpeg', 0.6));
