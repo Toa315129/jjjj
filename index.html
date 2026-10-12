@@ -112,4 +112,614 @@
         </header>
 
         <!-- SCREEN 1: START / HOME SCREEN -->
-        <section id="screen-home" class="relative z-20 flex-1
+        <section id="screen-home" class="relative z-20 flex-1 flex flex-col items-center justify-center text-center px-4 py-8 bg-white">
+            <!-- Minimal Background Elements -->
+            <div class="absolute w-[40rem] h-[40rem] bg-red-50/50 rounded-full blur-3xl -z-10 pointer-events-none -top-20 -right-20"></div>
+
+            <div class="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-red-50 border border-red-100 text-red-700 font-semibold text-xs tracking-widest mb-8 shadow-sm">
+                <span class="animate-pulse">🚩</span>
+                <span>เทศกาลถือศีลกินผัก อำเภอตะกั่วป่า</span>
+            </div>
+
+            <h2 class="text-7xl sm:text-8xl md:text-9xl font-black text-red-700 mb-4 drop-shadow-sm transition-transform hover:scale-105 duration-700" style="font-family: 'JS Chanok', 'Prompt';">
+                กินเจ
+            </h2>
+            <p class="text-gray-500 text-sm sm:text-lg font-light tracking-widest max-w-lg mb-12 px-4 leading-relaxed">
+                บันทึกความทรงจำผ่านภาพถ่ายสไตล์ Minimal<br>พร้อมระบบ Cloud Download ความละเอียดสูง
+            </p>
+
+            <button onclick="App.startCamera()" class="group relative inline-flex items-center justify-center px-10 py-4 font-bold text-lg text-white transition-all duration-300 bg-red-700 rounded-full shadow-lg hover:shadow-xl hover:bg-red-800 hover:-translate-y-1 active:translate-y-0 cursor-pointer">
+                <span class="mr-3 text-xl group-hover:scale-110 transition-transform duration-300">📸</span>
+                <span class="tracking-wider">เริ่มถ่ายรูป</span>
+            </button>
+        </section>
+
+        <!-- SCREEN 2: CAMERA VIEWPORT -->
+        <section id="screen-cam" class="hidden relative z-20 flex-1 flex flex-col items-center justify-center p-2 sm:p-6 overflow-hidden bg-gray-50/50">
+            
+            <div class="relative w-full max-w-4xl h-full flex flex-col items-center justify-center">
+                <!-- Camera Viewfinder Wrapper -->
+                <div id="viewfinder" class="relative w-full flex-1 max-h-[75vh] bg-gray-900 rounded-[2rem] overflow-hidden border border-gray-200 shadow-2xl flex items-center justify-center group">
+                    
+                    <video id="video-feed" class="w-full h-full object-cover -scale-x-100 transition-opacity duration-300" autoplay playsinline muted></video>
+                    
+                    <!-- Viewfinder Overlay Elements (Minimal White/Red) -->
+                    <div class="absolute inset-0 border-[8px] border-white/10 pointer-events-none rounded-[2rem]"></div>
+                    <!-- Focus Corners -->
+                    <div class="absolute top-8 left-8 w-12 h-12 border-t-2 border-l-2 border-red-500/80 rounded-tl-xl transition-all duration-300 group-hover:scale-95"></div>
+                    <div class="absolute top-8 right-8 w-12 h-12 border-t-2 border-r-2 border-red-500/80 rounded-tr-xl transition-all duration-300 group-hover:scale-95"></div>
+                    <div class="absolute bottom-8 left-8 w-12 h-12 border-b-2 border-l-2 border-red-500/80 rounded-bl-xl transition-all duration-300 group-hover:scale-95"></div>
+                    <div class="absolute bottom-8 right-8 w-12 h-12 border-b-2 border-r-2 border-red-500/80 rounded-br-xl transition-all duration-300 group-hover:scale-95"></div>
+
+                    <!-- Countdown Number -->
+                    <div id="countdown" class="hidden absolute z-50 text-9xl font-black text-white drop-shadow-2xl" style="text-shadow: 0 4px 20px rgba(198,40,40,0.5);">
+                        3
+                    </div>
+
+                    <!-- Camera Tools Floating Top-Right -->
+                    <div class="absolute top-6 right-6 flex flex-col gap-3 z-30">
+                        <button onclick="App.toggleCamera()" class="p-3.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white hover:text-red-700 transition-all active:scale-90 shadow-lg" title="สลับกล้อง">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Shot Status Counter Badge -->
+                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 bg-white/90 backdrop-blur-md border border-gray-200 px-5 py-2.5 rounded-full flex items-center gap-4 shadow-xl">
+                        <span id="shot-status-text" class="text-gray-800 font-bold text-xs tracking-widest uppercase">พร้อมถ่าย (0/3)</span>
+                        <div class="flex gap-2">
+                            <span id="dot-0" class="w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300"></span>
+                            <span id="dot-1" class="w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300"></span>
+                            <span id="dot-2" class="w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shutter Bar -->
+                <div class="w-full py-6 flex justify-center items-center">
+                    <button id="shutter-btn" onclick="App.startSequence()" class="group relative w-20 h-20 rounded-full border-4 border-gray-200 p-1 bg-white hover:border-red-100 transition-all active:scale-95 shadow-sm cursor-pointer flex items-center justify-center">
+                        <div class="w-16 h-16 rounded-full bg-red-600 shadow-inner group-hover:bg-red-700 transition-colors"></div>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- UPLOADING / PROCESSING OVERLAY -->
+        <div id="upload-overlay" class="hidden absolute inset-0 z-50 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center">
+            <div class="relative w-24 h-24 mb-8 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border-4 border-gray-100 border-t-red-600 animate-spin"></div>
+                <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center text-2xl shadow-inner">
+                    ☁️
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-900 mb-3 tracking-wide">กำลังประมวลผล...</h3>
+            <p id="upload-status-detail" class="text-gray-500 text-sm max-w-md font-light">กรุณารอสักครู่ ระบบกำลังสร้างรูปภาพและคิวอาร์โค้ด</p>
+        </div>
+
+        <!-- SCREEN 3: RESULT & DOWNLOAD -->
+        <section id="screen-result" class="hidden relative z-20 flex-1 w-full h-full flex flex-col lg:flex-row items-center justify-center p-4 sm:p-6 gap-8 overflow-y-auto bg-gray-50/50">
+            
+            <!-- Left Side: Canvas Preview Strip -->
+            <div class="flex-1 flex items-center justify-center h-full max-h-[80vh] lg:max-h-[85vh] w-full">
+                <div class="p-2 sm:p-4 rounded-[2rem] bg-white shadow-2xl h-full flex items-center justify-center aspect-[600/1800] border border-gray-100">
+                    <!-- Adjusted border to be minimal -->
+                    <canvas id="final-canvas" width="1200" height="3600" class="h-full w-auto max-h-[75vh] object-contain rounded-xl shadow-sm border border-gray-100"></canvas>
+                </div>
+            </div>
+
+            <!-- Right Side: ImgBB Cloud Details & Action Buttons -->
+            <div class="w-full lg:w-96 flex flex-col gap-5 z-30">
+                
+                <!-- Cloud Info Card -->
+                <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-xl flex flex-col items-center text-center relative overflow-hidden">
+                    <!-- Decorative accent line -->
+                    <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
+
+                    <div class="flex items-center gap-2 text-[10px] font-bold text-red-700 bg-red-50 px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase">
+                        <span>☁️ Cloud Generated</span>
+                    </div>
+
+                    <!-- Dynamic Cloud QR Code -->
+                    <div class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100 mb-6 flex flex-col items-center justify-center w-full max-w-[200px]">
+                        <div id="imgbb-qr-container" class="w-32 h-32 flex items-center justify-center"></div>
+                        <p class="text-[9px] font-bold text-gray-400 mt-4 tracking-widest uppercase">Scan to Download</p>
+                    </div>
+
+                    <!-- Direct ImgBB Link Display -->
+                    <div class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-2 pl-4 flex items-center justify-between gap-2">
+                        <span id="imgbb-url-text" class="text-xs text-gray-500 truncate font-mono">https://i.ibb.co/loading...</span>
+                        <button onclick="App.copyCloudUrl()" class="px-4 py-2 bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-[10px] rounded-xl transition-all shrink-0 tracking-wider uppercase shadow-sm">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex flex-col gap-3">
+                    <button onclick="App.downloadCanvas()" class="w-full py-4 bg-red-700 text-white font-bold text-sm rounded-2xl shadow-lg shadow-red-700/20 hover:bg-red-800 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 tracking-widest uppercase">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Save to Device</span>
+                    </button>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="App.openImgBBDirect()" class="w-full py-3 bg-white hover:bg-gray-50 text-gray-700 font-bold text-[11px] rounded-2xl border border-gray-200 shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 tracking-widest uppercase">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            <span>Open Link</span>
+                        </button>
+
+                        <button onclick="App.restart()" class="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white font-bold text-[11px] rounded-2xl shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 tracking-widest uppercase">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            <span>Retake</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Flash Effect -->
+    <div id="flash-effect" class="fixed inset-0 bg-white pointer-events-none z-50 opacity-0 transition-opacity duration-150"></div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-6 py-3.5 rounded-full text-xs font-semibold shadow-2xl translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-3 tracking-wide">
+        <span class="text-red-400">●</span>
+        <span id="toast-message">ข้อความแจ้งเตือน</span>
+    </div>
+
+    <script>
+        const App = (function() {
+            // ImgBB API Key and Application Constants (Logic Unchanged)
+            const CONFIG = {
+                imgbbApiKey: 'ffc90ad0bc5c7e0c056b68ef7430304a',
+                totalShots: 3,
+                countdownSec: 3,
+                canvasWidth: 1200,   // High-DPI Canvas Resolution (2x)
+                canvasHeight: 3600,
+                fontCustom: 'JS Chanok',
+                fontUI: 'Prompt'
+            };
+
+            // Application State
+            let state = {
+                stream: null,
+                facingMode: 'user',
+                capturedPhotos: [],
+                isShooting: false,
+                uploadedUrl: '',
+                uploadedViewerUrl: ''
+            };
+
+            // DOM Element References
+            const D = {
+                screens: {
+                    home: document.getElementById('screen-home'),
+                    cam: document.getElementById('screen-cam'),
+                    result: document.getElementById('screen-result')
+                },
+                video: document.getElementById('video-feed'),
+                countdown: document.getElementById('countdown'),
+                flash: document.getElementById('flash-effect'),
+                shutterBtn: document.getElementById('shutter-btn'),
+                shotStatusText: document.getElementById('shot-status-text'),
+              uploa    dots: [
+                    document.getElementById('dot-0'),
+                    document.getElementById('dot-1'),
+                    document.getElementById('dot-2')
+                ],
+                canvas: document.getElementById('final-canvas'),
+              dOverlay: document.getElementById('upload-overlay'),
+                qrContainer: document.getElementById('imgbb-qr-container'),
+                imgbbUrlText: document.getElementById('imgbb-url-text'),
+                toast: document.getElementById('toast'),
+                toastMsg: document.getElementById('toast-message')
+            };
+
+            // Audio FX via Web Audio API Synth
+            const SoundFX = {
+                playBeep: function() {
+                    try {
+                        const synth = new Tone.Synth().toDestination();
+                        synth.triggerAttackRelease("C6", "16n");
+                    } catch(e){}
+                },
+                playShutter: function() {
+                    try {
+                        const noise = new Tone.NoiseSynth({
+                            noise: { type: 'white' },
+                            envelope: { attack: 0.005, decay: 0.05, sustain: 0 }
+                        }).toDestination();
+                        noise.triggerAttackRelease("16n");
+                    } catch(e){}
+                }
+            };
+
+            function showToast(msg) {
+                D.toastMsg.innerText = msg;
+                D.toast.classList.remove('translate-y-24', 'opacity-0');
+                setTimeout(() => {
+                    D.toast.classList.add('translate-y-24', 'opacity-0');
+                }, 3000);
+            }
+
+            function switchScreen(screenName) {
+                Object.values(D.screens).forEach(s => s.classList.add('hidden'));
+                D.screens[screenName].classList.remove('hidden');
+            }
+
+            async function initCamera() {
+                if (state.stream) {
+                    state.stream.getTracks().forEach(track => track.stop());
+                }
+
+                try {
+                    const constraints = {
+                        video: {
+                            facingMode: state.facingMode,
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 }
+                        },
+                        audio: false
+                    };
+
+                    state.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    D.video.srcObject = state.stream;
+
+                    if (state.facingMode === 'user') {
+                        D.video.classList.add('-scale-x-100');
+                    } else {
+                        D.video.classList.remove('-scale-x-100');
+                    }
+                    return true;
+                } catch (err) {
+                    console.error("Camera Access Error:", err);
+                    showToast("กรุณาอนุญาตการเข้าถึงกล้องถ่ายรูป");
+                    return false;
+                }
+            }
+
+            function toggleCamera() {
+                if (state.isShooting) return;
+                state.facingMode = (state.facingMode === 'user') ? 'environment' : 'user';
+                initCamera();
+            }
+
+            async function startSequence() {
+                if (state.isShooting) return;
+                state.isShooting = true;
+                state.capturedPhotos = [];
+                D.shutterBtn.disabled = true;
+                D.shutterBtn.classList.add('opacity-50', 'pointer-events-none');
+
+                // Reset dots to minimal grey
+                D.dots.forEach(d => {
+                    d.className = "w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300";
+                });
+
+                for (let i = 0; i < CONFIG.totalShots; i++) {
+                    D.shotStatusText.innerText = `กำลังถ่าย (${i + 1}/${CONFIG.totalShots})`;
+                    await runCountdown();
+                    triggerFlash();
+                    SoundFX.playShutter();
+                    captureFrame();
+
+                    // Update dot to active red
+                    D.dots[i].className = "w-2.5 h-2.5 rounded-full bg-red-600 shadow-[0_0_8px_rgba(198,40,40,0.5)] transition-colors duration-300";
+                    await delay(600);
+                }
+
+                D.shotStatusText.innerText = "กำลังประมวลผล...";
+                
+                // Process Canvas & Upload to ImgBB
+                await processAndUploadCloud();
+            }
+
+            function runCountdown() {
+                return new Promise(resolve => {
+                    let count = CONFIG.countdownSec;
+                    D.countdown.classList.remove('hidden');
+                    D.countdown.innerText = count;
+                    SoundFX.playBeep();
+
+                    const interval = setInterval(() => {
+                        count--;
+                        if (count > 0) {
+                            D.countdown.innerText = count;
+                            SoundFX.playBeep();
+                        } else {
+                            clearInterval(interval);
+                            D.countdown.classList.add('hidden');
+                            resolve();
+                        }
+                    }, 1000);
+                });
+            }
+
+            function triggerFlash() {
+                D.flash.style.opacity = '1';
+                setTimeout(() => {
+                    D.flash.style.opacity = '0';
+                }, 150);
+            }
+
+            function captureFrame() {
+                const v = D.video;
+                const canvas = document.createElement('canvas');
+                canvas.width = v.videoWidth || 1280;
+                canvas.height = v.videoHeight || 720;
+                const ctx = canvas.getContext('2d');
+
+                if (state.facingMode === 'user') {
+                    ctx.translate(canvas.width, 0);
+                    ctx.scale(-1, 1);
+                }
+
+                ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+                state.capturedPhotos.push(canvas);
+            }
+
+            function delay(ms) {
+                return new Promise(res => setTimeout(res, ms));
+            }
+
+            async function processAndUploadCloud() {
+                // Show Upload Loading Screen
+                D.uploadOverlay.classList.remove('hidden');
+
+                // Step 1: Render Initial Canvas without QR Code
+                renderCanvasStrip(null);
+
+                // Step 2: Convert Canvas to Base64 String for ImgBB
+                const base64Image = D.canvas.toDataURL('image/png').split(',')[1];
+
+                try {
+                    // Step 3: ImgBB API POST Upload
+                    const formData = new FormData();
+                    formData.append('key', CONFIG.imgbbApiKey);
+                    formData.append('image', base64Image);
+                    formData.append('name', `KinJay_Photobooth_${Date.now()}`);
+
+                    const response = await fetch('https://api.imgbb.com/1/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const jsonResult = await response.json();
+
+                    if (jsonResult.success) {
+                        state.uploadedUrl = jsonResult.data.url;
+                        state.uploadedViewerUrl = jsonResult.data.url_viewer;
+
+                        D.imgbbUrlText.innerText = state.uploadedUrl;
+
+                        // Generate UI QR Code with Minimal Red Color
+                        generateQRCode(state.uploadedUrl);
+
+                        // Delay slightly to ensure QR Image rendering for Canvas Draw
+                        await delay(200);
+
+                        // Re-render Canvas with the ImgBB Cloud QR Code stamped!
+                        renderCanvasStrip(state.uploadedUrl);
+
+                        // Trigger Confetti Celebration (Red & White colors)
+                        confetti({
+                            particleCount: 100,
+                            spread: 70,
+                            origin: { y: 0.6 },
+                            colors: ['#c62828', '#ffffff', '#ef5350', '#e5e7eb']
+                        });
+
+                        showToast("ประมวลผลสำเร็จ!");
+                    } else {
+                        throw new Error("ImgBB Upload Failed");
+                    }
+                } catch (err) {
+                    console.error("ImgBB Error:", err);
+                    showToast("โหมดออฟไลน์: บันทึกรูปภาพลงเครื่องได้ตามปกติ");
+                    D.imgbbUrlText.innerText = "Offline Mode";
+                    generateQRCode("https://photobooth.app");
+                } finally {
+                    D.uploadOverlay.classList.add('hidden');
+                    switchScreen('result');
+                }
+            }
+
+            // REDESIGNED CANVAS RENDERER: MINIMAL WHITE-RED THEME
+            function renderCanvasStrip(qrUrl) {
+                const ctx = D.canvas.getContext('2d');
+                const W = CONFIG.canvasWidth;
+                const H = CONFIG.canvasHeight;
+
+                // Minimal Background Base (Pure White)
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, W, H);
+
+                // Subtle Outer Border Frame
+                ctx.strokeStyle = '#f3f4f6'; // Very light gray border inner edge
+                ctx.lineWidth = 10;
+                ctx.strokeRect(5, 5, W - 10, H - 10);
+
+                // Top Accent Line
+                ctx.fillStyle = '#c62828'; // Premium Red
+                ctx.fillRect(0, 0, W, 16);
+
+                // Main Title Text (Minimal & Elegant)
+                ctx.fillStyle = '#c62828';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Thai traditional font for main keyword
+                ctx.font = `140px "${CONFIG.fontCustom}", "${CONFIG.fontUI}", sans-serif`;
+                ctx.fillText("กินเจตะกั่วป่า", W / 2, 160);
+
+                // Modern UI font for subtitle
+                ctx.font = `500 36px "${CONFIG.fontUI}", sans-serif`;
+                ctx.letterSpacing = "8px"; // Note: HTML5 Canvas letterSpacing support varies, fallback is manual or just standard
+                ctx.fillText("VEGETARIAN FESTIVAL", W / 2, 250);
+
+                // Render 3 Captured Photos
+                const photoW = 1060;
+                const photoH = 920;
+                const padX = 70;
+                const startY = 320;
+                const gap = 50;
+
+                state.capturedPhotos.forEach((photoCanvas, index) => {
+                    const y = startY + (index * (photoH + gap));
+
+                    // Subtle Shadow Box
+                    ctx.save();
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+                    ctx.shadowBlur = 15;
+                    ctx.shadowOffsetY = 8;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(padX, y, photoW, photoH);
+                    ctx.restore();
+
+                    // Crop & Draw Image
+                    drawImageCover(ctx, photoCanvas, padX, y, photoW, photoH);
+
+                    // Premium Red Frame Stroke (Thin & Elegant)
+                    ctx.strokeStyle = '#c62828';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(padX - 2, y - 2, photoW + 4, photoH + 4);
+                });
+
+                // Footer Section
+                const footerY = 3330;
+
+                // Minimal Footer Divider Line
+                ctx.strokeStyle = '#e5e7eb'; // gray-200
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(80, footerY - 40);
+                ctx.lineTo(W - 80, footerY - 40);
+                ctx.stroke();
+
+                // Footer Text (Modern)
+                ctx.fillStyle = '#1f2937'; // zinc-800
+                ctx.textAlign = 'left';
+                
+                ctx.font = `600 44px "${CONFIG.fontUI}", sans-serif`;
+                ctx.fillText("SAPHASENA", 80, footerY + 30);
+
+                ctx.fillStyle = '#6b7280'; // gray-500
+                ctx.font = `400 24px "${CONFIG.fontUI}", monospace, sans-serif`;
+                ctx.fillText(`MINIMAL CLOUD PHOTOSTRIP • ${new Date().getFullYear()}`, 80, footerY + 90);
+
+                // Draw QR Code onto Canvas if uploaded
+                if (qrUrl) {
+                    const qrImg = D.qrContainer.querySelector('img') || D.qrContainer.querySelector('canvas');
+                    if (qrImg) {
+                        const qrSize = 180;
+                        const qrX = W - 80 - qrSize;
+                        const qrY = footerY - 10;
+
+                        // QR Background box for clean read
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20);
+
+                        ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+
+                        // QR Code red outline
+                        ctx.strokeStyle = '#c62828';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12);
+                    }
+                }
+            }
+
+            function drawImageCover(ctx, img, x, y, w, h) {
+                const imgW = img.width;
+                const imgH = img.height;
+                const imgRatio = imgW / imgH;
+                const targetRatio = w / h;
+
+                let renderW, renderH, offsetX = 0, offsetY = 0;
+
+                if (imgRatio > targetRatio) {
+                    renderH = imgH;
+                    renderW = imgH * targetRatio;
+                    offsetX = (imgW - renderW) / 2;
+                } else {
+                    renderW = imgW;
+                    renderH = imgW / targetRatio;
+                    offsetY = (imgH - renderH) / 2;
+                }
+
+                ctx.drawImage(img, offsetX, offsetY, renderW, renderH, x, y, w, h);
+            }
+
+            function generateQRCode(url) {
+                D.qrContainer.innerHTML = '';
+                new QRCode(D.qrContainer, {
+                    text: url,
+                    width: 128,
+                    height: 128,
+                    colorDark: "#c62828", // Match premium red
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+
+            // Action Functions (Logic Unchanged)
+            function downloadCanvas() {
+                try {
+                    const link = document.createElement('a');
+                    link.download = `KinJay_Minimal_${Date.now()}.png`;
+                    link.href = D.canvas.toDataURL('image/png', 1.0);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showToast("บันทึกรูปภาพสำเร็จ!");
+                } catch(e) {
+                    showToast("แตะค้างที่รูปภาพเพื่อบันทึก");
+                }
+            }
+
+            function copyCloudUrl() {
+                if (!state.uploadedUrl) return;
+                navigator.clipboard.writeText(state.uploadedUrl).then(() => {
+                    showToast("คัดลอกลิงก์สำเร็จ!");
+                }).catch(() => {
+                    showToast("ไม่สามารถคัดลอกได้");
+                });
+            }
+
+            function openImgBBDirect() {
+                if (state.uploadedUrl) {
+                    window.open(state.uploadedUrl, '_blank');
+                } else {
+                    showToast("ยังไม่มีลิงก์");
+                }
+            }
+
+            function restartApp() {
+                state.capturedPhotos = [];
+                state.isShooting = false;
+                state.uploadedUrl = '';
+                D.shutterBtn.disabled = false;
+                D.shutterBtn.classList.remove('opacity-50', 'pointer-events-none');
+                D.dots.forEach(d => {
+                    d.className = "w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300";
+                });
+                switchScreen('cam');
+            }
+
+            return {
+                startCamera: async function() {
+                    const ok = await initCamera();
+                    if (ok) switchScreen('cam');
+                },
+                toggleCamera: toggleCamera,
+                startSequence: startSequence,
+                downloadCanvas: downloadCanvas,
+                copyCloudUrl: copyCloudUrl,
+                openImgBBDirect: openImgBBDirect,
+                restart: restartApp
+            };
+        })();
+    </script>
+</body>
+</html>
