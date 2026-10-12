@@ -1,14 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>กินเจ PHOTOBOOTH - Premium Minimal</title>
+    <title>ปังลืมอ้วน PHOTOBOOTH - Minimal Receipt</title>
     
-    <!-- External Fonts & Scripts -->
+    <!-- External Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,29 +17,31 @@
     <!-- QRCode JS Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
-    <!-- Tone JS for Studio Camera & Shutter Audio Effects -->
+    <!-- Tone JS for Audio Effects -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
-    <!-- Canvas Confetti for Celebration Effect -->
+    <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-red': '#d32f2f',
+                        'brand-dark': '#1a1a1a',
+                        'receipt-bg': '#fcfcfc',
+                    },
+                    fontFamily: {
+                        ui: ['Prompt', 'sans-serif'],
+                        mono: ['Space Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        @font-face {
-            font-family: 'JS Chanok';
-            src: url('https://cdn.jsdelivr.net/gh/Toa315129/Saphabooth@main/JS-Chanok-Normal.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-        }
-
-        :root {
-            --red-premium: #c62828;
-            --red-light: #ef5350;
-            --bg-white: #fdfdfd;
-            --font-ui: 'Prompt', sans-serif;
-            --font-title: 'JS Chanok', 'Prompt', sans-serif;
-        }
-
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
@@ -47,9 +50,9 @@
         }
 
         body {
-            font-family: var(--font-ui);
-            background-color: var(--bg-white);
-            color: #1f2937; /* zinc-800 */
+            font-family: 'Prompt', sans-serif;
+            background-color: #f5f5f5;
+            color: #1a1a1a;
             overflow: hidden;
             width: 100vw;
             height: 100dvh;
@@ -57,201 +60,211 @@
             padding: 0;
         }
 
-        /* Minimal Glass Cards */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(198, 40, 40, 0.1);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        /* Minimal UI Components */
+        .minimal-card {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
 
-        /* Font Preloader */
-        .font-preload {
-            font-family: 'JS Chanok';
+        .btn-primary {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:active {
+            transform: translateY(2px);
+            background-color: #b71c1c;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: #d32f2f;
+            border: 1px solid #d32f2f;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-outline:active {
+            background-color: #ffebee;
+        }
+
+        /* Receipt edge decoration for canvas preview container */
+        .receipt-edge {
+            background: #ffffff;
+            position: relative;
+        }
+        .receipt-edge::before, .receipt-edge::after {
+            content: "";
             position: absolute;
-            opacity: 0;
-            pointer-events: none;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background-size: 16px 16px;
+        }
+        .receipt-edge::before {
+            top: -8px;
+            background-image: radial-gradient(circle at 8px 0, transparent 8px, #ffffff 9px);
+        }
+        .receipt-edge::after {
+            bottom: -8px;
+            background-image: radial-gradient(circle at 8px 16px, transparent 8px, #ffffff 9px);
         }
 
         /* Custom Scrollbars */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(198, 40, 40, 0.2); border-radius: 10px; }
-
-        /* Animation tweaks */
-        @keyframes subtlePulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.9; }
-        }
+        ::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 4px; }
     </style>
 </head>
-<body class="flex flex-col h-full w-full justify-center items-center bg-gray-50 selection:bg-red-100 selection:text-red-900">
+<body class="flex flex-col h-full w-full justify-center items-center">
 
-    <div class="font-preload">กินผัก @ takuapa saphasena 齋 🚩</div>
-
-    <!-- Main Application Wrapper -->
-    <div id="app" class="relative w-full h-full max-w-7xl mx-auto flex flex-col justify-between overflow-hidden bg-white shadow-2xl sm:rounded-none lg:rounded-2xl lg:h-[95vh] lg:my-auto border border-gray-100">
+    <div id="app" class="relative w-full h-full max-w-5xl mx-auto flex flex-col justify-between overflow-hidden bg-white sm:rounded-2xl sm:my-4 sm:h-[calc(100dvh-2rem)] sm:border sm:border-gray-200 sm:shadow-sm">
         
         <!-- Header Bar -->
-        <header class="relative z-30 w-full px-6 py-4 flex items-center justify-between border-b border-red-100/50 bg-white/80 backdrop-blur-md">
+        <header class="relative z-30 w-full px-6 py-4 flex items-center justify-between border-b border-gray-100 bg-white">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-red-700 flex items-center justify-center font-bold text-white text-xl shadow-md border border-red-800/20">
-                    齋
+                <div class="w-8 h-8 rounded bg-brand-red flex items-center justify-center font-bold text-white text-sm">
+                    🚩
                 </div>
                 <div>
-                    <h1 class="text-red-700 font-bold text-lg leading-none tracking-widest uppercase">Kin Jay Photobooth</h1>
-                    <p class="text-[10px] text-gray-500 font-medium tracking-widest mt-0.5 uppercase">Takuapa Vegetarian Festival</p>
+                    <h1 class="text-brand-red font-bold text-lg leading-none tracking-wide">ปังลืมอ้วน</h1>
+                    <p class="text-[10px] text-gray-500 font-mono tracking-wider mt-1 uppercase">Takuapa Veg Festival</p>
                 </div>
             </div>
 
-            <div id="connection-status" class="flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-4 py-1.5 rounded-full text-emerald-600 text-[10px] font-bold tracking-wider">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>CLOUD READY</span>
+            <div id="connection-status" class="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded border border-gray-200 text-gray-600 text-xs font-mono">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                <span>SYSTEM.READY</span>
             </div>
         </header>
 
         <!-- SCREEN 1: START / HOME SCREEN -->
-        <section id="screen-home" class="relative z-20 flex-1 flex flex-col items-center justify-center text-center px-4 py-8 bg-white">
-            <!-- Minimal Background Elements -->
-            <div class="absolute w-[40rem] h-[40rem] bg-red-50/50 rounded-full blur-3xl -z-10 pointer-events-none -top-20 -right-20"></div>
-
-            <div class="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-red-50 border border-red-100 text-red-700 font-semibold text-xs tracking-widest mb-8 shadow-sm">
-                <span class="animate-pulse">🚩</span>
-                <span>เทศกาลถือศีลกินผัก อำเภอตะกั่วป่า</span>
+        <section id="screen-home" class="relative z-20 flex-1 flex flex-col items-center justify-center text-center px-4 py-8 bg-[#fafafa]">
+            
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded bg-red-50 border border-red-100 text-brand-red font-medium text-xs tracking-wider mb-8">
+                <span>เทศกาลกินผัก ตะกั่วป่า</span>
             </div>
 
-            <h2 class="text-7xl sm:text-8xl md:text-9xl font-black text-red-700 mb-4 drop-shadow-sm transition-transform hover:scale-105 duration-700" style="font-family: 'JS Chanok', 'Prompt';">
-                กินเจ
+            <h2 class="text-5xl sm:text-7xl font-bold text-brand-dark mb-4 tracking-tight">
+                ปังลืมอ้วน<span class="text-brand-red">.</span>
             </h2>
-            <p class="text-gray-500 text-sm sm:text-lg font-light tracking-widest max-w-lg mb-12 px-4 leading-relaxed">
-                บันทึกความทรงจำผ่านภาพถ่ายสไตล์ Minimal<br>พร้อมระบบ Cloud Download ความละเอียดสูง
+            <p class="text-gray-500 text-sm sm:text-base font-light tracking-wide max-w-md mb-12 px-4 leading-relaxed">
+                ถ่ายภาพ 3 ช็อตในสไตล์ใบเสร็จมินิมอล<br>สแกน QR Code ดาวน์โหลดภาพขึ้นคลาวด์ได้ทันที
             </p>
 
-            <button onclick="App.startCamera()" class="group relative inline-flex items-center justify-center px-10 py-4 font-bold text-lg text-white transition-all duration-300 bg-red-700 rounded-full shadow-lg hover:shadow-xl hover:bg-red-800 hover:-translate-y-1 active:translate-y-0 cursor-pointer">
-                <span class="mr-3 text-xl group-hover:scale-110 transition-transform duration-300">📸</span>
-                <span class="tracking-wider">เริ่มถ่ายรูป</span>
+            <button onclick="App.startCamera()" class="btn-primary flex items-center justify-center px-8 py-4 font-medium text-lg rounded shadow-sm hover:shadow-md cursor-pointer group">
+                <span class="mr-2">กดเพื่อถ่ายภาพ</span>
+                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
             </button>
         </section>
 
         <!-- SCREEN 2: CAMERA VIEWPORT -->
-        <section id="screen-cam" class="hidden relative z-20 flex-1 flex flex-col items-center justify-center p-2 sm:p-6 overflow-hidden bg-gray-50/50">
+        <section id="screen-cam" class="hidden relative z-20 flex-1 flex flex-col bg-[#f5f5f5]">
             
-            <div class="relative w-full max-w-4xl h-full flex flex-col items-center justify-center">
+            <div class="flex-1 p-4 sm:p-6 flex flex-col items-center justify-center relative w-full h-full">
                 <!-- Camera Viewfinder Wrapper -->
-                <div id="viewfinder" class="relative w-full flex-1 max-h-[75vh] bg-gray-900 rounded-[2rem] overflow-hidden border border-gray-200 shadow-2xl flex items-center justify-center group">
+                <div id="viewfinder" class="relative w-full max-w-3xl flex-1 bg-gray-200 rounded-lg overflow-hidden border border-gray-300 shadow-inner flex items-center justify-center">
                     
-                    <video id="video-feed" class="w-full h-full object-cover -scale-x-100 transition-opacity duration-300" autoplay playsinline muted></video>
+                    <video id="video-feed" class="w-full h-full object-cover -scale-x-100" autoplay playsinline muted></video>
                     
-                    <!-- Viewfinder Overlay Elements (Minimal White/Red) -->
-                    <div class="absolute inset-0 border-[8px] border-white/10 pointer-events-none rounded-[2rem]"></div>
-                    <!-- Focus Corners -->
-                    <div class="absolute top-8 left-8 w-12 h-12 border-t-2 border-l-2 border-red-500/80 rounded-tl-xl transition-all duration-300 group-hover:scale-95"></div>
-                    <div class="absolute top-8 right-8 w-12 h-12 border-t-2 border-r-2 border-red-500/80 rounded-tr-xl transition-all duration-300 group-hover:scale-95"></div>
-                    <div class="absolute bottom-8 left-8 w-12 h-12 border-b-2 border-l-2 border-red-500/80 rounded-bl-xl transition-all duration-300 group-hover:scale-95"></div>
-                    <div class="absolute bottom-8 right-8 w-12 h-12 border-b-2 border-r-2 border-red-500/80 rounded-br-xl transition-all duration-300 group-hover:scale-95"></div>
+                    <!-- Viewfinder Overlay - Minimal Frame -->
+                    <div class="absolute inset-0 border-2 border-white/20 pointer-events-none"></div>
+                    
+                    <!-- Center Crosshair -->
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
+                        <div class="w-8 h-px bg-white"></div>
+                        <div class="w-px h-8 bg-white absolute"></div>
+                    </div>
 
                     <!-- Countdown Number -->
-                    <div id="countdown" class="hidden absolute z-50 text-9xl font-black text-white drop-shadow-2xl" style="text-shadow: 0 4px 20px rgba(198,40,40,0.5);">
+                    <div id="countdown" class="hidden absolute z-50 text-8xl font-bold text-white drop-shadow-md">
                         3
                     </div>
 
-                    <!-- Camera Tools Floating Top-Right -->
-                    <div class="absolute top-6 right-6 flex flex-col gap-3 z-30">
-                        <button onclick="App.toggleCamera()" class="p-3.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white hover:text-red-700 transition-all active:scale-90 shadow-lg" title="สลับกล้อง">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <!-- Camera Tools -->
+                    <div class="absolute top-4 right-4 z-30">
+                        <button onclick="App.toggleCamera()" class="p-2.5 rounded bg-black/40 backdrop-blur text-white hover:bg-brand-red transition-colors" title="สลับกล้อง">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         </button>
                     </div>
 
-                    <!-- Shot Status Counter Badge -->
-                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 bg-white/90 backdrop-blur-md border border-gray-200 px-5 py-2.5 rounded-full flex items-center gap-4 shadow-xl">
-                        <span id="shot-status-text" class="text-gray-800 font-bold text-xs tracking-widest uppercase">พร้อมถ่าย (0/3)</span>
-                        <div class="flex gap-2">
-                            <span id="dot-0" class="w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300"></span>
-                            <span id="dot-1" class="w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300"></span>
-                            <span id="dot-2" class="w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300"></span>
+                    <!-- Shot Status Badge -->
+                    <div class="absolute bottom-4 left-4 z-30 bg-white/90 backdrop-blur px-3 py-1.5 rounded border border-gray-200 flex items-center gap-3">
+                        <span id="shot-status-text" class="text-brand-dark font-mono text-xs font-semibold">READY [0/3]</span>
+                        <div class="flex gap-1.5">
+                            <span id="dot-0" class="w-2 h-2 rounded bg-gray-300"></span>
+                            <span id="dot-1" class="w-2 h-2 rounded bg-gray-300"></span>
+                            <span id="dot-2" class="w-2 h-2 rounded bg-gray-300"></span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Shutter Bar -->
                 <div class="w-full py-6 flex justify-center items-center">
-                    <button id="shutter-btn" onclick="App.startSequence()" class="group relative w-20 h-20 rounded-full border-4 border-gray-200 p-1 bg-white hover:border-red-100 transition-all active:scale-95 shadow-sm cursor-pointer flex items-center justify-center">
-                        <div class="w-16 h-16 rounded-full bg-red-600 shadow-inner group-hover:bg-red-700 transition-colors"></div>
+                    <button id="shutter-btn" onclick="App.startSequence()" class="w-16 h-16 rounded-full border-4 border-gray-200 p-1 hover:border-brand-red transition-colors active:scale-95 flex items-center justify-center bg-white cursor-pointer">
+                        <div class="w-full h-full rounded-full bg-brand-red"></div>
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- UPLOADING / PROCESSING OVERLAY -->
-        <div id="upload-overlay" class="hidden absolute inset-0 z-50 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center">
-            <div class="relative w-24 h-24 mb-8 flex items-center justify-center">
-                <div class="absolute inset-0 rounded-full border-4 border-gray-100 border-t-red-600 animate-spin"></div>
-                <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center text-2xl shadow-inner">
-                    ☁️
-                </div>
-            </div>
-
-            <h3 class="text-2xl font-bold text-gray-900 mb-3 tracking-wide">กำลังประมวลผล...</h3>
-            <p id="upload-status-detail" class="text-gray-500 text-sm max-w-md font-light">กรุณารอสักครู่ ระบบกำลังสร้างรูปภาพและคิวอาร์โค้ด</p>
+        <!-- UPLOADING OVERLAY -->
+        <div id="upload-overlay" class="hidden absolute inset-0 z-50 bg-white/95 backdrop-blur flex flex-col items-center justify-center p-6 text-center">
+            <div class="w-12 h-12 mb-6 rounded-full border-2 border-gray-100 border-t-brand-red animate-spin"></div>
+            <h3 class="text-xl font-medium text-brand-dark mb-2">กำลังพิมพ์ใบเสร็จ...</h3>
+            <p class="text-gray-500 font-mono text-xs uppercase tracking-widest">Generating Cloud Link</p>
         </div>
 
         <!-- SCREEN 3: RESULT & DOWNLOAD -->
-        <section id="screen-result" class="hidden relative z-20 flex-1 w-full h-full flex flex-col lg:flex-row items-center justify-center p-4 sm:p-6 gap-8 overflow-y-auto bg-gray-50/50">
+        <section id="screen-result" class="hidden relative z-20 flex-1 w-full h-full flex flex-col lg:flex-row p-4 sm:p-6 gap-8 bg-[#f5f5f5] overflow-y-auto">
             
-            <!-- Left Side: Canvas Preview Strip -->
-            <div class="flex-1 flex items-center justify-center h-full max-h-[80vh] lg:max-h-[85vh] w-full">
-                <div class="p-2 sm:p-4 rounded-[2rem] bg-white shadow-2xl h-full flex items-center justify-center aspect-[600/1800] border border-gray-100">
-                    <!-- Adjusted border to be minimal -->
-                    <canvas id="final-canvas" width="1200" height="3600" class="h-full w-auto max-h-[75vh] object-contain rounded-xl shadow-sm border border-gray-100"></canvas>
+            <!-- Left Side: Canvas Preview (Receipt Style) -->
+            <div class="flex-1 flex items-start justify-center h-full w-full pt-4 pb-12">
+                <!-- Wrapper for receipt edges -->
+                <div class="relative max-w-full inline-block shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+                    <div class="receipt-edge p-2 bg-white">
+                        <canvas id="final-canvas" width="1200" height="3400" class="h-auto w-full max-w-[280px] sm:max-w-[320px] object-contain block border border-gray-100"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Side: ImgBB Cloud Details & Action Buttons -->
-            <div class="w-full lg:w-96 flex flex-col gap-5 z-30">
+            <!-- Right Side: Controls -->
+            <div class="w-full lg:w-80 flex flex-col gap-4 z-30 shrink-0 self-center pb-8 lg:pb-0">
                 
-                <!-- Cloud Info Card -->
-                <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-xl flex flex-col items-center text-center relative overflow-hidden">
-                    <!-- Decorative accent line -->
-                    <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
-
-                    <div class="flex items-center gap-2 text-[10px] font-bold text-red-700 bg-red-50 px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase">
-                        <span>☁️ Cloud Generated</span>
-                    </div>
-
-                    <!-- Dynamic Cloud QR Code -->
-                    <div class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100 mb-6 flex flex-col items-center justify-center w-full max-w-[200px]">
+                <!-- QR Card -->
+                <div class="minimal-card p-5 flex flex-col items-center text-center">
+                    <div class="text-xs font-mono text-gray-500 mb-3 border-b border-gray-100 w-full pb-2">DIGITAL COPY</div>
+                    
+                    <div class="bg-white p-2 border border-gray-200 rounded mb-4">
                         <div id="imgbb-qr-container" class="w-32 h-32 flex items-center justify-center"></div>
-                        <p class="text-[9px] font-bold text-gray-400 mt-4 tracking-widest uppercase">Scan to Download</p>
                     </div>
 
-                    <!-- Direct ImgBB Link Display -->
-                    <div class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-2 pl-4 flex items-center justify-between gap-2">
-                        <span id="imgbb-url-text" class="text-xs text-gray-500 truncate font-mono">https://i.ibb.co/loading...</span>
-                        <button onclick="App.copyCloudUrl()" class="px-4 py-2 bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-[10px] rounded-xl transition-all shrink-0 tracking-wider uppercase shadow-sm">
+                    <div class="w-full bg-gray-50 border border-gray-200 rounded p-2.5 flex items-center justify-between gap-2">
+                        <span id="imgbb-url-text" class="text-[10px] text-gray-600 truncate font-mono">https://i.ibb.co/...</span>
+                        <button onclick="App.copyCloudUrl()" class="px-2 py-1 bg-white border border-gray-300 hover:bg-gray-100 text-brand-dark text-[10px] rounded transition-colors font-mono uppercase">
                             Copy
                         </button>
                     </div>
                 </div>
 
                 <!-- Action Controls -->
-                <div class="flex flex-col gap-3">
-                    <button onclick="App.downloadCanvas()" class="w-full py-4 bg-red-700 text-white font-bold text-sm rounded-2xl shadow-lg shadow-red-700/20 hover:bg-red-800 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 tracking-widest uppercase">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span>Save to Device</span>
+                <div class="flex flex-col gap-2.5">
+                    <button onclick="App.downloadCanvas()" class="btn-primary w-full py-3 text-sm font-medium rounded flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        บันทึกรูปภาพ
                     </button>
 
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="App.openImgBBDirect()" class="w-full py-3 bg-white hover:bg-gray-50 text-gray-700 font-bold text-[11px] rounded-2xl border border-gray-200 shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 tracking-widest uppercase">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                            <span>Open Link</span>
-                        </button>
+                    <button onclick="App.openImgBBDirect()" class="btn-outline w-full py-3 text-sm font-medium rounded flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        เปิดลิงก์รูป
+                    </button>
 
-                        <button onclick="App.restart()" class="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white font-bold text-[11px] rounded-2xl shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 tracking-widest uppercase">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                            <span>Retake</span>
-                        </button>
-                    </div>
+                    <button onclick="App.restart()" class="w-full py-3 mt-2 text-gray-500 hover:text-brand-dark bg-gray-100 hover:bg-gray-200 text-sm font-medium rounded transition-colors flex items-center justify-center gap-2">
+                        ถ่ายภาพใหม่
+                    </button>
                 </div>
 
             </div>
@@ -263,35 +276,30 @@
     <div id="flash-effect" class="fixed inset-0 bg-white pointer-events-none z-50 opacity-0 transition-opacity duration-150"></div>
 
     <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-6 py-3.5 rounded-full text-xs font-semibold shadow-2xl translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-3 tracking-wide">
-        <span class="text-red-400">●</span>
-        <span id="toast-message">ข้อความแจ้งเตือน</span>
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-brand-dark text-white px-4 py-2.5 rounded shadow-lg -translate-y-16 opacity-0 transition-all duration-300 flex items-center gap-2 text-sm font-medium">
+        <span id="toast-message">แจ้งเตือน</span>
     </div>
 
     <script>
         const App = (function() {
-            // ImgBB API Key and Application Constants (Logic Unchanged)
             const CONFIG = {
                 imgbbApiKey: 'ffc90ad0bc5c7e0c056b68ef7430304a',
                 totalShots: 3,
                 countdownSec: 3,
-                canvasWidth: 1200,   // High-DPI Canvas Resolution (2x)
-                canvasHeight: 3600,
-                fontCustom: 'JS Chanok',
-                fontUI: 'Prompt'
+                canvasWidth: 1200,   
+                canvasHeight: 3400, // Adjusted for receipt style
+                fontUI: 'Prompt',
+                fontMono: 'Space Mono'
             };
 
-            // Application State
             let state = {
                 stream: null,
                 facingMode: 'user',
                 capturedPhotos: [],
                 isShooting: false,
                 uploadedUrl: '',
-                uploadedViewerUrl: ''
             };
 
-            // DOM Element References
             const D = {
                 screens: {
                     home: document.getElementById('screen-home'),
@@ -303,33 +311,37 @@
                 flash: document.getElementById('flash-effect'),
                 shutterBtn: document.getElementById('shutter-btn'),
                 shotStatusText: document.getElementById('shot-status-text'),
-              uploa    dots: [
+                dots: [
                     document.getElementById('dot-0'),
                     document.getElementById('dot-1'),
                     document.getElementById('dot-2')
                 ],
                 canvas: document.getElementById('final-canvas'),
-              dOverlay: document.getElementById('upload-overlay'),
+                uploadOverlay: document.getElementById('upload-overlay'),
                 qrContainer: document.getElementById('imgbb-qr-container'),
                 imgbbUrlText: document.getElementById('imgbb-url-text'),
                 toast: document.getElementById('toast'),
                 toastMsg: document.getElementById('toast-message')
             };
 
-            // Audio FX via Web Audio API Synth
             const SoundFX = {
                 playBeep: function() {
                     try {
-                        const synth = new Tone.Synth().toDestination();
-                        synth.triggerAttackRelease("C6", "16n");
+                        const synth = new Tone.Synth({
+                            oscillator: { type: "square" },
+                            envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
+                        }).toDestination();
+                        synth.volume.value = -10;
+                        synth.triggerAttackRelease("C5", "32n");
                     } catch(e){}
                 },
                 playShutter: function() {
                     try {
                         const noise = new Tone.NoiseSynth({
                             noise: { type: 'white' },
-                            envelope: { attack: 0.005, decay: 0.05, sustain: 0 }
+                            envelope: { attack: 0.001, decay: 0.1, sustain: 0 }
                         }).toDestination();
+                        noise.volume.value = -5;
                         noise.triggerAttackRelease("16n");
                     } catch(e){}
                 }
@@ -337,9 +349,11 @@
 
             function showToast(msg) {
                 D.toastMsg.innerText = msg;
-                D.toast.classList.remove('translate-y-24', 'opacity-0');
+                D.toast.classList.remove('-translate-y-16', 'opacity-0');
+                D.toast.classList.add('translate-y-0', 'opacity-100');
                 setTimeout(() => {
-                    D.toast.classList.add('translate-y-24', 'opacity-0');
+                    D.toast.classList.remove('translate-y-0', 'opacity-100');
+                    D.toast.classList.add('-translate-y-16', 'opacity-0');
                 }, 3000);
             }
 
@@ -352,20 +366,13 @@
                 if (state.stream) {
                     state.stream.getTracks().forEach(track => track.stop());
                 }
-
                 try {
                     const constraints = {
-                        video: {
-                            facingMode: state.facingMode,
-                            width: { ideal: 1920 },
-                            height: { ideal: 1080 }
-                        },
+                        video: { facingMode: state.facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
                         audio: false
                     };
-
                     state.stream = await navigator.mediaDevices.getUserMedia(constraints);
                     D.video.srcObject = state.stream;
-
                     if (state.facingMode === 'user') {
                         D.video.classList.add('-scale-x-100');
                     } else {
@@ -373,7 +380,7 @@
                     }
                     return true;
                 } catch (err) {
-                    console.error("Camera Access Error:", err);
+                    console.error("Camera Error:", err);
                     showToast("กรุณาอนุญาตการเข้าถึงกล้องถ่ายรูป");
                     return false;
                 }
@@ -392,26 +399,19 @@
                 D.shutterBtn.disabled = true;
                 D.shutterBtn.classList.add('opacity-50', 'pointer-events-none');
 
-                // Reset dots to minimal grey
-                D.dots.forEach(d => {
-                    d.className = "w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300";
-                });
+                D.dots.forEach(d => { d.className = "w-2 h-2 rounded bg-gray-300"; });
 
                 for (let i = 0; i < CONFIG.totalShots; i++) {
-                    D.shotStatusText.innerText = `กำลังถ่าย (${i + 1}/${CONFIG.totalShots})`;
+                    D.shotStatusText.innerText = `REC [${i + 1}/3]`;
                     await runCountdown();
                     triggerFlash();
                     SoundFX.playShutter();
                     captureFrame();
-
-                    // Update dot to active red
-                    D.dots[i].className = "w-2.5 h-2.5 rounded-full bg-red-600 shadow-[0_0_8px_rgba(198,40,40,0.5)] transition-colors duration-300";
-                    await delay(600);
+                    D.dots[i].className = "w-2 h-2 rounded bg-brand-red";
+                    await delay(700);
                 }
 
-                D.shotStatusText.innerText = "กำลังประมวลผล...";
-                
-                // Process Canvas & Upload to ImgBB
+                D.shotStatusText.innerText = "PROCESSING";
                 await processAndUploadCloud();
             }
 
@@ -438,9 +438,7 @@
 
             function triggerFlash() {
                 D.flash.style.opacity = '1';
-                setTimeout(() => {
-                    D.flash.style.opacity = '0';
-                }, 150);
+                setTimeout(() => { D.flash.style.opacity = '0'; }, 100);
             }
 
             function captureFrame() {
@@ -454,179 +452,194 @@
                     ctx.translate(canvas.width, 0);
                     ctx.scale(-1, 1);
                 }
-
                 ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
                 state.capturedPhotos.push(canvas);
             }
 
-            function delay(ms) {
-                return new Promise(res => setTimeout(res, ms));
-            }
+            function delay(ms) { return new Promise(res => setTimeout(res, ms)); }
 
             async function processAndUploadCloud() {
-                // Show Upload Loading Screen
                 D.uploadOverlay.classList.remove('hidden');
-
-                // Step 1: Render Initial Canvas without QR Code
+                
+                // Render base receipt without QR first
                 renderCanvasStrip(null);
 
-                // Step 2: Convert Canvas to Base64 String for ImgBB
-                const base64Image = D.canvas.toDataURL('image/png').split(',')[1];
+                const base64Image = D.canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
                 try {
-                    // Step 3: ImgBB API POST Upload
                     const formData = new FormData();
                     formData.append('key', CONFIG.imgbbApiKey);
                     formData.append('image', base64Image);
-                    formData.append('name', `KinJay_Photobooth_${Date.now()}`);
+                    
+                    // Mock delay for feeling
+                    await delay(500);
 
                     const response = await fetch('https://api.imgbb.com/1/upload', {
-                        method: 'POST',
-                        body: formData
+                        method: 'POST', body: formData
                     });
 
                     const jsonResult = await response.json();
 
                     if (jsonResult.success) {
                         state.uploadedUrl = jsonResult.data.url;
-                        state.uploadedViewerUrl = jsonResult.data.url_viewer;
-
                         D.imgbbUrlText.innerText = state.uploadedUrl;
 
-                        // Generate UI QR Code with Minimal Red Color
                         generateQRCode(state.uploadedUrl);
-
-                        // Delay slightly to ensure QR Image rendering for Canvas Draw
                         await delay(200);
 
-                        // Re-render Canvas with the ImgBB Cloud QR Code stamped!
+                        // Render again with QR
                         renderCanvasStrip(state.uploadedUrl);
 
-                        // Trigger Confetti Celebration (Red & White colors)
                         confetti({
-                            particleCount: 100,
-                            spread: 70,
-                            origin: { y: 0.6 },
-                            colors: ['#c62828', '#ffffff', '#ef5350', '#e5e7eb']
+                            particleCount: 80,
+                            spread: 60,
+                            origin: { y: 0.8 },
+                            colors: ['#d32f2f', '#1a1a1a', '#ffffff']
                         });
-
-                        showToast("ประมวลผลสำเร็จ!");
-                    } else {
-                        throw new Error("ImgBB Upload Failed");
-                    }
+                    } else { throw new Error("Upload Failed"); }
                 } catch (err) {
-                    console.error("ImgBB Error:", err);
-                    showToast("โหมดออฟไลน์: บันทึกรูปภาพลงเครื่องได้ตามปกติ");
+                    console.error("Upload Error:", err);
+                    showToast("โหมดออฟไลน์ (อัปโหลดไม่สำเร็จ)");
                     D.imgbbUrlText.innerText = "Offline Mode";
-                    generateQRCode("https://photobooth.app");
+                    generateQRCode("offline");
+                    renderCanvasStrip("offline");
                 } finally {
                     D.uploadOverlay.classList.add('hidden');
                     switchScreen('result');
                 }
             }
 
-            // REDESIGNED CANVAS RENDERER: MINIMAL WHITE-RED THEME
             function renderCanvasStrip(qrUrl) {
                 const ctx = D.canvas.getContext('2d');
                 const W = CONFIG.canvasWidth;
                 const H = CONFIG.canvasHeight;
+                const cx = W / 2;
 
-                // Minimal Background Base (Pure White)
+                // 1. Background
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, W, H);
 
-                // Subtle Outer Border Frame
-                ctx.strokeStyle = '#f3f4f6'; // Very light gray border inner edge
-                ctx.lineWidth = 10;
-                ctx.strokeRect(5, 5, W - 10, H - 10);
+                // Helper: draw dashed line
+                function drawDashedLine(y) {
+                    ctx.beginPath();
+                    ctx.setLineDash([15, 15]);
+                    ctx.moveTo(80, y);
+                    ctx.lineTo(W - 80, y);
+                    ctx.strokeStyle = '#cccccc';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
 
-                // Top Accent Line
-                ctx.fillStyle = '#c62828'; // Premium Red
-                ctx.fillRect(0, 0, W, 16);
-
-                // Main Title Text (Minimal & Elegant)
-                ctx.fillStyle = '#c62828';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+                // 2. Receipt Header
+                let currentY = 120;
                 
-                // Thai traditional font for main keyword
-                ctx.font = `140px "${CONFIG.fontCustom}", "${CONFIG.fontUI}", sans-serif`;
-                ctx.fillText("กินเจตะกั่วป่า", W / 2, 160);
+                // Store logo/name
+                ctx.fillStyle = '#d32f2f'; // Red text
+                ctx.font = `bold 140px ${CONFIG.fontUI}, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText("ปังลืมอ้วน", cx, currentY);
+                currentY += 180;
 
-                // Modern UI font for subtitle
-                ctx.font = `500 36px "${CONFIG.fontUI}", sans-serif`;
-                ctx.letterSpacing = "8px"; // Note: HTML5 Canvas letterSpacing support varies, fallback is manual or just standard
-                ctx.fillText("VEGETARIAN FESTIVAL", W / 2, 250);
+                ctx.fillStyle = '#1a1a1a'; // Dark text
+                ctx.font = `50px ${CONFIG.fontUI}, sans-serif`;
+                ctx.fillText("เทศกาลกินผัก ตะกั่วป่า", cx, currentY);
+                currentY += 100;
+                
+                // Timestamp info
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('th-TH');
+                const timeStr = now.toLocaleTimeString('th-TH');
+                const receiptNo = `NO. ${Math.floor(10000 + Math.random() * 90000)}`;
 
-                // Render 3 Captured Photos
-                const photoW = 1060;
-                const photoH = 920;
-                const padX = 70;
-                const startY = 320;
-                const gap = 50;
+                ctx.font = `36px ${CONFIG.fontMono}, monospace`;
+                ctx.fillStyle = '#666666';
+                ctx.textAlign = 'left';
+                ctx.fillText(`DATE: ${dateStr}`, 100, currentY);
+                ctx.textAlign = 'right';
+                ctx.fillText(`TIME: ${timeStr}`, W - 100, currentY);
+                
+                currentY += 60;
+                ctx.textAlign = 'center';
+                ctx.fillText(`TRX: ${receiptNo}`, cx, currentY);
+                
+                currentY += 80;
+                drawDashedLine(currentY);
+                currentY += 80;
 
-                state.capturedPhotos.forEach((photoCanvas, index) => {
-                    const y = startY + (index * (photoH + gap));
+                // 3. Photos (4:3 ratio)
+                const photoW = 1040;
+                const photoH = 780;
+                const padX = (W - photoW) / 2;
+                const gap = 80;
 
-                    // Subtle Shadow Box
-                    ctx.save();
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
-                    ctx.shadowBlur = 15;
-                    ctx.shadowOffsetY = 8;
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(padX, y, photoW, photoH);
-                    ctx.restore();
-
-                    // Crop & Draw Image
-                    drawImageCover(ctx, photoCanvas, padX, y, photoW, photoH);
-
-                    // Premium Red Frame Stroke (Thin & Elegant)
-                    ctx.strokeStyle = '#c62828';
+                state.capturedPhotos.forEach((photoCanvas) => {
+                    // Thin black border
+                    ctx.strokeStyle = '#1a1a1a';
                     ctx.lineWidth = 4;
-                    ctx.strokeRect(padX - 2, y - 2, photoW + 4, photoH + 4);
+                    ctx.strokeRect(padX - 2, currentY - 2, photoW + 4, photoH + 4);
+                    
+                    drawImageCover(ctx, photoCanvas, padX, currentY, photoW, photoH);
+                    currentY += photoH + gap;
                 });
 
-                // Footer Section
-                const footerY = 3330;
+                drawDashedLine(currentY - gap / 2);
+                currentY += gap / 2;
 
-                // Minimal Footer Divider Line
-                ctx.strokeStyle = '#e5e7eb'; // gray-200
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(80, footerY - 40);
-                ctx.lineTo(W - 80, footerY - 40);
-                ctx.stroke();
-
-                // Footer Text (Modern)
-                ctx.fillStyle = '#1f2937'; // zinc-800
+                // 4. Footer & QR
                 ctx.textAlign = 'left';
+                ctx.fillStyle = '#1a1a1a';
+                ctx.font = `bold 60px ${CONFIG.fontUI}, sans-serif`;
+                ctx.fillText("THANK YOU", 100, currentY);
                 
-                ctx.font = `600 44px "${CONFIG.fontUI}", sans-serif`;
-                ctx.fillText("SAPHASENA", 80, footerY + 30);
-
-                ctx.fillStyle = '#6b7280'; // gray-500
-                ctx.font = `400 24px "${CONFIG.fontUI}", monospace, sans-serif`;
-                ctx.fillText(`MINIMAL CLOUD PHOTOSTRIP • ${new Date().getFullYear()}`, 80, footerY + 90);
-
-                // Draw QR Code onto Canvas if uploaded
+                ctx.fillStyle = '#d32f2f';
+                ctx.font = `40px ${CONFIG.fontUI}, sans-serif`;
+                ctx.fillText("FOR SUPPORTING", 100, currentY + 60);
+                
+                ctx.fillStyle = '#666666';
+                ctx.font = `30px ${CONFIG.fontMono}, monospace`;
+                ctx.fillText("TAKUAPA VEGETARIAN FEST", 100, currentY + 120);
+                
+                // Draw QR Code on the right
                 if (qrUrl) {
                     const qrImg = D.qrContainer.querySelector('img') || D.qrContainer.querySelector('canvas');
-                    if (qrImg) {
-                        const qrSize = 180;
-                        const qrX = W - 80 - qrSize;
-                        const qrY = footerY - 10;
+                    if (qrImg && qrUrl !== "offline") {
+                        const qrSize = 200;
+                        const qrX = W - 100 - qrSize;
+                        const qrY = currentY - 20;
 
-                        // QR Background box for clean read
+                        // QR Border
                         ctx.fillStyle = '#ffffff';
                         ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20);
+                        ctx.strokeStyle = '#1a1a1a';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20);
 
                         ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
-
-                        // QR Code red outline
-                        ctx.strokeStyle = '#c62828';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12);
+                        
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#1a1a1a';
+                        ctx.font = `20px ${CONFIG.fontMono}, monospace`;
+                        ctx.fillText("SCAN TO DL", qrX + qrSize/2, qrY + qrSize + 30);
+                    } else if (qrUrl === "offline") {
+                         ctx.textAlign = 'right';
+                         ctx.fillStyle = '#666666';
+                         ctx.font = `30px ${CONFIG.fontMono}, monospace`;
+                         ctx.fillText("OFFLINE PRINT", W - 100, currentY + 60);
                     }
+                }
+                
+                currentY += 240;
+                
+                // Barcode mock at the very bottom
+                ctx.fillStyle = '#1a1a1a';
+                const barcodeH = 100;
+                let bx = 100;
+                while (bx < W - 100) {
+                    const barW = Math.random() > 0.5 ? 4 : 12;
+                    ctx.fillRect(bx, currentY, barW, barcodeH);
+                    bx += barW + (Math.random() * 10 + 4);
                 }
             }
 
@@ -653,35 +666,35 @@
 
             function generateQRCode(url) {
                 D.qrContainer.innerHTML = '';
+                if(url === "offline") return;
                 new QRCode(D.qrContainer, {
                     text: url,
                     width: 128,
                     height: 128,
-                    colorDark: "#c62828", // Match premium red
+                    colorDark: "#1a1a1a",
                     colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
+                    correctLevel: QRCode.CorrectLevel.L
                 });
             }
 
-            // Action Functions (Logic Unchanged)
             function downloadCanvas() {
                 try {
                     const link = document.createElement('a');
-                    link.download = `KinJay_Minimal_${Date.now()}.png`;
-                    link.href = D.canvas.toDataURL('image/png', 1.0);
+                    link.download = `PungLuemAuan_Receipt_${Date.now()}.jpg`;
+                    link.href = D.canvas.toDataURL('image/jpeg', 0.9);
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
-                    showToast("บันทึกรูปภาพสำเร็จ!");
+                    showToast("ดาวน์โหลดรูปภาพแล้ว");
                 } catch(e) {
-                    showToast("แตะค้างที่รูปภาพเพื่อบันทึก");
+                    showToast("กรุณากดค้างที่รูปภาพเพื่อบันทึก");
                 }
             }
 
             function copyCloudUrl() {
                 if (!state.uploadedUrl) return;
                 navigator.clipboard.writeText(state.uploadedUrl).then(() => {
-                    showToast("คัดลอกลิงก์สำเร็จ!");
+                    showToast("คัดลอกลิงก์แล้ว");
                 }).catch(() => {
                     showToast("ไม่สามารถคัดลอกได้");
                 });
@@ -691,7 +704,7 @@
                 if (state.uploadedUrl) {
                     window.open(state.uploadedUrl, '_blank');
                 } else {
-                    showToast("ยังไม่มีลิงก์");
+                    showToast("ไม่มีลิงก์รูปภาพ");
                 }
             }
 
@@ -701,9 +714,7 @@
                 state.uploadedUrl = '';
                 D.shutterBtn.disabled = false;
                 D.shutterBtn.classList.remove('opacity-50', 'pointer-events-none');
-                D.dots.forEach(d => {
-                    d.className = "w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300";
-                });
+                D.dots.forEach(d => { d.className = "w-2 h-2 rounded bg-gray-300"; });
                 switchScreen('cam');
             }
 
